@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home360 Narrated Demo</title>
+<meta name="description" content="Home360 narrated product walkthrough — a short, voice-guided video tour of the live platform. Demo data only.">
+<style>
+:root {
+  --forest: #2D6A4F;
+  --forest2: #1E4D39;
+  --forest-dark: #163C2C;
+  --mint: #DCEAE3;
+  --mint2: #F2F8F5;
+  --amber: #F59E0B;
+  --amber-dark: #B5720A;
+  --ink: #111827;
+  --gray: #5B6B63;
+  --gray-light: #8A968F;
+  --white: #FFFFFF;
+  --line: #E3ECE6;
+  --shadow-sm: 0 1px 2px rgba(17,24,39,0.06), 0 1px 3px rgba(17,24,39,0.08);
+  --shadow-md: 0 10px 30px rgba(17,24,39,0.10);
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  background: var(--white);
+  color: var(--ink);
+}
+img { max-width: 100%; }
+
+/* ---------- HERO ---------- */
+.hero {
+  background: radial-gradient(circle at 85% -10%, var(--forest2) 0%, var(--forest) 55%);
+  color: var(--white);
+  padding: 56px 8vw 64px;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+.hero-mark {
+  display: inline-flex; align-items: center; gap: 12px; margin-bottom: 22px;
+}
+.hero-mark .box {
+  width: 40px; height: 40px; border-radius: 11px;
+  background: var(--amber); color: var(--forest-dark);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 18px;
+  box-shadow: var(--shadow-md);
+}
+.hero-mark .word { font-size: 22px; font-weight: 800; letter-spacing: 0.5px; }
+.kicker {
+  letter-spacing: 3px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--amber);
+  text-transform: uppercase;
+}
+.hero h1 {
+  font-size: clamp(28px, 4.6vw, 44px);
+  margin: 12px 0 14px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+.hero p {
+  font-size: 16px;
+  color: var(--mint);
+  max-width: 560px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 22px;
+  color: var(--mint);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+.back-link:hover { opacity: 1; text-decoration: underline; }
+
+/* ---------- PLAYER ---------- */
+.wrap { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+.player-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: var(--shadow-md);
+  margin-top: -40px;
+  margin-bottom: 28px;
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+}
+video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: var(--forest-dark);
+}
+.player-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 24px;
+  border-top: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.player-meta .badge {
+  display: inline-flex;
+  background: var(--mint2);
+  color: var(--forest);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+.player-meta .duration {
+  font-size: 12.5px;
+  color: var(--gray-light);
+}
+
+.other-demo {
+  text-align: center;
+  padding: 4px 24px 8px;
+  color: var(--gray);
+  font-size: 14px;
+}
+.other-demo a {
+  color: var(--forest);
+  font-weight: 700;
+  text-decoration: none;
+}
+.other-demo a:hover { text-decoration: underline; }
+
+/* ---------- FOOTER NOTE ---------- */
+.footnote {
+  text-align: center;
+  color: var(--gray-light);
+  font-size: 12.5px;
+  padding: 32px 24px 56px;
+  letter-spacing: 0.2px;
+}
+.footnote strong { color: var(--gray); }
+
+@media (max-width: 600px) {
+  .player-meta { justify-content: center; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-mark">
+    <div class="box">H</div>
+    <div class="word">HOME360</div>
+  </div>
+  <div class="kicker">Narrated Walkthrough</div>
+  <h1>Watch Home360 in action &mdash; with voice</h1>
+  <p>A short, narrated video tour of the product: smart upload, maintenance, the AI assistant, and the home timeline.</p>
+  <a class="back-link" href="../">&larr; Back to all demos</a>
+</div>
+
+<div class="wrap">
+  <div class="player-card">
+    <video controls preload="metadata">
+      <source src="demo.mp4" type="video/mp4">
+      Your browser doesn't support embedded video. <a href="demo.mp4">Download the video</a> instead.
+    </video>
+    <div class="player-meta">
+      <span class="badge">Narrated &middot; Has Voice</span>
+      <span class="duration">About 1&ndash;2 minutes &middot; sound on</span>
+    </div>
+  </div>
+  <div class="other-demo">
+    Prefer no sound? Watch the <a href="../self-running/">captioned self-running demo</a> instead, or try the <a href="../interactive/">click-through demo</a>.
+  </div>
+</div>
+
+<div class="footnote">
+  <strong>Demo Property &mdash; No Real Customer Data.</strong> This walkthrough uses an invented name, address, and figures for illustration only. &middot; Principium Technology
+</div>
+
+</body>
+</html>
