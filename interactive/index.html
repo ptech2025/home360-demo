@@ -93,6 +93,18 @@
   .tab.active { background: var(--forest); color: var(--white); border-color: var(--forest); }
   .tab:hover:not(.active) { border-color: var(--forest); }
 
+  .audio-control {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 16px; padding: 10px 16px; border-radius: 999px;
+    border: 1px solid var(--forest); background: var(--white); color: var(--forest);
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: background .15s ease, color .15s ease;
+  }
+  .audio-control:hover, .audio-control:focus-visible { background: var(--forest); color: var(--white); }
+  .audio-control.hero-audio { border-color: var(--amber); background: transparent; color: var(--white); }
+  .audio-control.hero-audio:hover, .audio-control.hero-audio:focus-visible { background: var(--amber); color: var(--forest2); }
+  .audio-control.proof-audio { margin-top: 24px; }
+
   .demo-stage {
     display: grid; grid-template-columns: 1fr 1fr; gap: 40px;
     align-items: center;
@@ -217,6 +229,7 @@
       <div class="stat-chip"><div class="num">1.44M</div><div class="lbl">licensed U.S. realtors (NAR, 2026)</div></div>
       <div class="stat-chip"><div class="num">Live</div><div class="lbl">production app + AI platform + realtor pilot</div></div>
     </div>
+    <button class="audio-control hero-audio" type="button" data-audio="audio/01_welcome.mp3" data-label="Play overview">▶ Play overview</button>
   </section>
 
   <div class="demo-wrap">
@@ -256,6 +269,7 @@
         <p>Independent review completed; every finding remediated end to end.</p>
       </div>
     </div>
+    <button class="audio-control proof-audio" type="button" data-audio="audio/08_current_progress.mp3" data-label="Play current progress">▶ Play current progress</button>
   </div>
 
   <div class="footer">
@@ -270,9 +284,54 @@
   </div>
 
 <script>
+const narrationAudio = new Audio();
+let activeAudioButton = null;
+
+function resetAudioButton(button) {
+  if (!button) return;
+  button.textContent = `▶ ${button.dataset.label}`;
+  button.setAttribute("aria-pressed", "false");
+}
+
+function stopNarration() {
+  narrationAudio.pause();
+  narrationAudio.currentTime = 0;
+  resetAudioButton(activeAudioButton);
+  activeAudioButton = null;
+}
+
+function toggleNarration(button) {
+  const src = button.dataset.audio;
+  if (activeAudioButton === button && !narrationAudio.paused) {
+    narrationAudio.pause();
+    button.textContent = `▶ Resume ${button.dataset.label.replace(/^Play /, "")}`;
+    button.setAttribute("aria-pressed", "false");
+    return;
+  }
+  if (activeAudioButton !== button) {
+    stopNarration();
+    narrationAudio.src = src;
+    activeAudioButton = button;
+  }
+  narrationAudio.play();
+  button.textContent = `❚❚ Pause ${button.dataset.label.replace(/^Play /, "")}`;
+  button.setAttribute("aria-pressed", "true");
+}
+
+narrationAudio.addEventListener("ended", () => {
+  resetAudioButton(activeAudioButton);
+  activeAudioButton = null;
+});
+
+document.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-audio]");
+  if (button) toggleNarration(button);
+});
+
 const moments = [
   {
     tab: "1. See Your Risk",
+    audio: "audio/02_see_your_risk.mp3",
     title: "Home Health Score",
     body: "Every home gets a continuously updated risk score — fire, carbon monoxide, water damage, and overdue maintenance — personalized to that property's age, appliances, and history.",
     why: "Why it matters: this is the hook that makes homeowners open the app before anything is even wrong.",
@@ -299,6 +358,7 @@ const moments = [
   },
   {
     tab: "2. Snap. It's Filed.",
+    audio: "audio/03_snap_its_filed.mp3",
     title: "AI Document & Photo Extraction",
     body: "Photograph a receipt, appliance manual, or insurance document. The AI reads it and extracts structured data automatically — across 8 document categories — no manual entry.",
     why: "Why it matters: this is the onboarding unlock. Most home-management apps die at data entry; Home360 removes it.",
@@ -317,6 +377,7 @@ const moments = [
   },
   {
     tab: "3. Ask Anything",
+    audio: "audio/04_ask_anything.mp3",
     title: "Conversational AI Assistant",
     body: "A full-memory, natural-language assistant that manages the home on request — schedule a task, explain a maintenance item, or summarize what's outstanding.",
     why: "Why it matters: this is what makes Home360 feel like a home-management partner, not a database.",
@@ -333,6 +394,7 @@ const moments = [
   },
   {
     tab: "4. It Handles It",
+    audio: "audio/05_it_handles_it.mp3",
     title: "Auto-Pilot Maintenance",
     body: "When maintenance is due, the AI drafts an outreach message to a service provider — and with one-tap approval, sends it. This is the step beyond reminders into autonomous action.",
     why: "Why it matters: this is the single most defensible feature versus every reminder-app competitor.",
@@ -348,6 +410,7 @@ const moments = [
   },
   {
     tab: "5. Move In, Done",
+    audio: "audio/06_move_in_done.mp3",
     title: "One-Click Import & Video Walkthrough",
     body: "A homeowner walks through the new home with their phone, or uploads a batch of closing documents. Computer vision and AI classification populate the entire home profile in minutes.",
     why: "Why it matters: this collapses onboarding from a multi-week chore into the day someone gets their keys.",
@@ -364,6 +427,7 @@ const moments = [
   },
   {
     tab: "6. Your Brand, Live",
+    audio: "audio/07_your_brand_live.mp3",
     title: "White-Label Engine",
     body: "The same platform, instantly re-skinned with a partner's logo, colors, and referral link — already validating with a pilot cohort of 10 realtors. Tap below to see the same screen, two brand identities.",
     why: "Why it matters: this is the B2B2C distribution engine — the reason a single realtor becomes a channel, not just a customer.",
@@ -419,6 +483,7 @@ const tabsEl = document.getElementById("tabs");
 const stageEl = document.getElementById("stage");
 
 function render(i) {
+  stopNarration();
   const m = moments[i];
   tabsEl.querySelectorAll(".tab").forEach((t, idx) => t.classList.toggle("active", idx === i));
   stageEl.innerHTML = `
@@ -426,13 +491,15 @@ function render(i) {
       <h3>${m.title}</h3>
       <p>${m.body}</p>
       <div class="why">${m.why}</div>
+      <button class="audio-control" type="button" data-audio="${m.audio}" data-label="Play narration for ${m.title}" aria-pressed="false">▶ Play narration</button>
     </div>
     <div class="phone"><div class="phone-screen">${m.screen}</div></div>
   `;
 }
 
 moments.forEach((m, i) => {
-  const t = document.createElement("div");
+  const t = document.createElement("button");
+  t.type = "button";
   t.className = "tab" + (i === 0 ? " active" : "");
   t.textContent = m.tab;
   t.onclick = () => render(i);
