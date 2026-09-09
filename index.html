@@ -4,193 +4,204 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Home360 Demos</title>
-<meta name="description" content="Home360 product demonstrations — an interactive click-through demo and a self-running captioned walkthrough. Demo data only.">
+<meta name="description" content="Home360 product demonstrations — an interactive click-through demo, a self-running captioned walkthrough, and a narrated video walkthrough. Demo data only.">
 <style>
-  :root {
-    --forest: #2D6A4F;
-    --forest2: #1E4D39;
-    --forest-dark: #163C2C;
-    --mint: #DCEAE3;
-    --mint2: #F2F8F5;
-    --amber: #F59E0B;
-    --amber-dark: #B5720A;
-    --ink: #111827;
-    --gray: #5B6B63;
-    --gray-light: #8A968F;
-    --white: #FFFFFF;
-    --line: #E3ECE6;
-    --shadow-sm: 0 1px 2px rgba(17,24,39,0.06), 0 1px 3px rgba(17,24,39,0.08);
-    --shadow-md: 0 10px 30px rgba(17,24,39,0.10);
-  }
-  * { box-sizing: border-box; }
-  html, body {
-    margin: 0;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    background: var(--white);
-    color: var(--ink);
-  }
-  img { max-width: 100%; }
+:root {
+  --forest: #2D6A4F;
+  --forest2: #1E4D39;
+  --forest-dark: #163C2C;
+  --mint: #DCEAE3;
+  --mint2: #F2F8F5;
+  --amber: #F59E0B;
+  --amber-dark: #B5720A;
+  --ink: #111827;
+  --gray: #5B6B63;
+  --gray-light: #8A968F;
+  --white: #FFFFFF;
+  --line: #E3ECE6;
+  --shadow-sm: 0 1px 2px rgba(17,24,39,0.06), 0 1px 3px rgba(17,24,39,0.08);
+  --shadow-md: 0 10px 30px rgba(17,24,39,0.10);
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  background: var(--white);
+  color: var(--ink);
+}
+img { max-width: 100%; }
 
-  /* ---------- HERO ---------- */
-  .hero {
-    background: radial-gradient(circle at 85% -10%, var(--forest2) 0%, var(--forest) 55%);
-    color: var(--white);
-    padding: 64px 8vw 72px;
-    position: relative;
-    overflow: hidden;
-    text-align: center;
-  }
-  .hero-mark {
-    display: inline-flex; align-items: center; gap: 12px; margin-bottom: 26px;
-  }
-  .hero-mark .box {
-    width: 44px; height: 44px; border-radius: 12px;
-    background: var(--amber); color: var(--forest-dark);
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 800; font-size: 20px;
-    box-shadow: var(--shadow-md);
-  }
-  .hero-mark .word { font-size: 24px; font-weight: 800; letter-spacing: 0.5px; }
-  .kicker {
-    letter-spacing: 3px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--amber);
-    text-transform: uppercase;
-  }
-  .hero h1 {
-    font-size: clamp(32px, 5vw, 52px);
-    margin: 12px 0 14px;
-    font-weight: 800;
-    line-height: 1.15;
-  }
-  .hero p {
-    font-size: 17px;
-    color: var(--mint);
-    max-width: 620px;
-    margin: 0 auto;
-    line-height: 1.6;
-  }
+/* ---------- HERO ---------- */
+.hero {
+  background: radial-gradient(circle at 85% -10%, var(--forest2) 0%, var(--forest) 55%);
+  color: var(--white);
+  padding: 64px 8vw 72px;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+.hero-mark {
+  display: inline-flex; align-items: center; gap: 12px; margin-bottom: 26px;
+}
+.hero-mark .box {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: var(--amber); color: var(--forest-dark);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 20px;
+  box-shadow: var(--shadow-md);
+}
+.hero-mark .word { font-size: 24px; font-weight: 800; letter-spacing: 0.5px; }
+.kicker {
+  letter-spacing: 3px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--amber);
+  text-transform: uppercase;
+}
+.hero h1 {
+  font-size: clamp(32px, 5vw, 52px);
+  margin: 12px 0 14px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+.hero p {
+  font-size: 17px;
+  color: var(--mint);
+  max-width: 660px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
 
-  /* ---------- CARDS ---------- */
-  .wrap { max-width: 960px; margin: 0 auto; padding: 0 24px; }
-  .cards {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    margin-top: -44px;
-    margin-bottom: 48px;
-    position: relative;
-    z-index: 2;
-  }
-  .card {
-    background: var(--white);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 30px 28px 28px;
-    box-shadow: var(--shadow-md);
-    display: flex;
-    flex-direction: column;
-  }
-  .card .badge {
-    display: inline-flex;
-    align-self: flex-start;
-    background: var(--mint2);
-    color: var(--forest);
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    padding: 5px 12px;
-    border-radius: 999px;
-    margin-bottom: 16px;
-  }
-  .card h2 {
-    font-size: 21px;
-    margin: 0 0 10px;
-    font-weight: 800;
-  }
-  .card p {
-    color: var(--gray);
-    font-size: 14.5px;
-    line-height: 1.65;
-    margin: 0 0 22px;
-    flex: 1;
-  }
-  .card .meta {
-    font-size: 12.5px;
-    color: var(--gray-light);
-    margin-bottom: 18px;
-  }
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    background: var(--forest);
-    color: var(--white);
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 14.5px;
-    padding: 13px 22px;
-    border-radius: 999px;
-    transition: transform .15s ease, box-shadow .15s ease;
-  }
-  .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(45,106,79,0.28); }
-  .btn.amber { background: var(--amber); color: var(--forest-dark); }
-  .btn.amber:hover { box-shadow: 0 8px 20px rgba(245,158,11,0.32); }
+/* ---------- CARDS ---------- */
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+.cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 24px;
+  margin-top: -44px;
+  margin-bottom: 48px;
+  position: relative;
+  z-index: 2;
+}
+.card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 30px 28px 28px;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+}
+.card .badge {
+  display: inline-flex;
+  align-self: flex-start;
+  background: var(--mint2);
+  color: var(--forest);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+.card h2 {
+  font-size: 21px;
+  margin: 0 0 10px;
+  font-weight: 800;
+}
+.card p {
+  color: var(--gray);
+  font-size: 14.5px;
+  line-height: 1.65;
+  margin: 0 0 22px;
+  flex: 1;
+}
+.card .meta {
+  font-size: 12.5px;
+  color: var(--gray-light);
+  margin-bottom: 18px;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--forest);
+  color: var(--white);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 14.5px;
+  padding: 13px 22px;
+  border-radius: 999px;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(45,106,79,0.28); }
+.btn.amber { background: var(--amber); color: var(--forest-dark); }
+.btn.amber:hover { box-shadow: 0 8px 20px rgba(245,158,11,0.32); }
 
-  /* ---------- FOOTER NOTE ---------- */
-  .footnote {
-    text-align: center;
-    color: var(--gray-light);
-    font-size: 12.5px;
-    padding: 0 24px 56px;
-    letter-spacing: 0.2px;
-  }
-  .footnote strong { color: var(--gray); }
+/* ---------- FOOTER NOTE ---------- */
+.footnote {
+  text-align: center;
+  color: var(--gray-light);
+  font-size: 12.5px;
+  padding: 0 24px 56px;
+  letter-spacing: 0.2px;
+}
+.footnote strong { color: var(--gray); }
 
-  @media (max-width: 720px) {
-    .cards { grid-template-columns: 1fr; }
-  }
+@media (max-width: 980px) {
+  .cards { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 640px) {
+  .cards { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
 
 <div class="hero">
-  <div class="hero-mark">
-    <div class="box">H</div>
-    <div class="word">HOME360</div>
-  </div>
-  <div class="kicker">Product Demonstrations</div>
-  <h1>Two ways to see Home360 in action</h1>
-  <p>Explore the product yourself, or watch a guided walkthrough run on its own — both use a fictional demo property, so nothing here is real customer data.</p>
+<div class="hero-mark">
+<div class="box">H</div>
+<div class="word">HOME360</div>
+</div>
+<div class="kicker">Product Demonstrations</div>
+<h1>Three ways to see Home360 in action</h1>
+<p>Explore the product yourself, watch a guided walkthrough run on its own, or watch a short narrated video tour — all three use a fictional demo property, so nothing here is real customer data.</p>
 </div>
 
 <div class="wrap">
-  <div class="cards">
+<div class="cards">
 
-    <div class="card">
-      <span class="badge">Interactive</span>
-      <h2>Click-Through Demo</h2>
-      <p>Explore the Home360 dashboard, appliances, maintenance, and documents at your own pace — click around and see how the product works.</p>
-      <div class="meta">Self-paced &middot; no time limit</div>
-      <a class="btn" href="interactive/">Launch Interactive Demo &rarr;</a>
-    </div>
+<div class="card">
+<span class="badge">Interactive</span>
+<h2>Click-Through Demo</h2>
+<p>Explore the Home360 dashboard, appliances, maintenance, and documents at your own pace — click around and see how the product works.</p>
+<div class="meta">Self-paced &middot; no time limit</div>
+<a class="btn" href="interactive/">Launch Interactive Demo &rarr;</a>
+</div>
 
-    <div class="card">
-      <span class="badge">Self-Running</span>
-      <h2>Guided Walkthrough</h2>
-      <p>Sit back and watch: one click starts a fully automatic, captioned tour of the product story, from dashboard to home timeline, then it resets itself.</p>
-      <div class="meta">About 4&ndash;5 minutes &middot; captions, no sound needed</div>
-      <a class="btn amber" href="self-running/">Launch Self-Running Demo &rarr;</a>
-    </div>
+<div class="card">
+<span class="badge">Self-Running</span>
+<h2>Guided Walkthrough</h2>
+<p>Sit back and watch: one click starts a fully automatic, captioned tour of the product story, from dashboard to home timeline, then it resets itself.</p>
+<div class="meta">About 4&ndash;5 minutes &middot; captions, no sound needed</div>
+<a class="btn amber" href="self-running/">Launch Self-Running Demo &rarr;</a>
+</div>
 
-  </div>
+<div class="card">
+<span class="badge">Narrated</span>
+<h2>Voice Walkthrough</h2>
+<p>Watch a short, narrated video tour of the product: smart upload, maintenance, the AI assistant, and the home timeline &mdash; with a real voice-over.</p>
+<div class="meta">About 1&ndash;2 minutes &middot; has voice, sound on</div>
+<a class="btn" href="narrated/">Watch Narrated Demo &rarr;</a>
+</div>
+
+</div>
 </div>
 
 <div class="footnote">
-  <strong>Demo Property &mdash; No Real Customer Data.</strong> Both demonstrations use invented names, addresses, and figures for illustration only. &middot; Principium Technology
+<strong>Demo Property &mdash; No Real Customer Data.</strong> All three demonstrations use invented names, addresses, and figures for illustration only. &middot; Principium Technology
 </div>
 
 </body>
