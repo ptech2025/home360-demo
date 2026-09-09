@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home360 Product Demonstration</title>
+<meta name="description" content="Self-running Home360 product demonstration — captioned, simulated product activity. Demo data only.">
+<style>
+/* ============================================================
+   Home360 Product Demo — Stylesheet
+   Brand palette verified against the live app (ai.myhomethreesixty.com):
+   forest greens + amber accent, white reading surfaces, dark ink text.
+   ============================================================ */
+
+:root {
+  --forest: #2D6A4F;
+  --forest2: #1E4D39;
+  --forest-dark: #163C2C;
+  --mint: #DCEAE3;
+  --mint2: #F2F8F5;
+  --amber: #F59E0B;
+  --amber-dark: #B5720A;
+  --ink: #111827;
+  --gray: #5B6B63;
+  --gray-light: #8A968F;
+  --white: #FFFFFF;
+  --line: #E3ECE6;
+  --ok: #1E7A46;
+  --ok-bg: #E4F3E9;
+  --warn: #B5720A;
+  --warn-bg: #FDECD1;
+  --danger: #B3261E;
+  --danger-bg: #FBE6E4;
+  --shadow-sm: 0 1px 2px rgba(17,24,39,0.06), 0 1px 3px rgba(17,24,39,0.08);
+  --shadow-md: 0 8px 24px rgba(17,24,39,0.10);
+  --shadow-lg: 0 24px 60px rgba(22,60,44,0.28);
+  --radius: 14px;
+  --radius-sm: 9px;
+}
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0; height: 100%;
+  background: var(--forest-dark);
+  color: var(--ink);
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+button { font-family: inherit; cursor: pointer; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* ---------- Stage: fills viewport, everything lives inside ---------- */
+#stage {
+  position: relative;
+  width: 100vw; height: 100vh;
+  min-width: 960px; min-height: 600px;
+  background: var(--mint2);
+  overflow: hidden;
+}
+
+/* ============================================================
+   START / LOOP SCREEN
+   ============================================================ */
+#start-screen {
+  position: absolute; inset: 0;
+  z-index: 500;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 50% 20%, var(--forest2) 0%, var(--forest-dark) 70%);
+  color: var(--white);
+  text-align: center;
+  transition: opacity .6s ease;
+}
+#start-screen.hidden { opacity: 0; pointer-events: none; }
+.start-logo {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 28px;
+}
+.start-logo .mark {
+  width: 56px; height: 56px; border-radius: 16px;
+  background: var(--amber); color: var(--forest-dark);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 26px; font-family: Georgia, serif;
+  box-shadow: var(--shadow-md);
+}
+.start-logo .word { font-size: 34px; font-weight: 800; letter-spacing: 0.5px; }
+.start-title { font-size: 46px; font-weight: 800; margin: 0 0 10px; max-width: 760px; line-height: 1.15; }
+.start-sub { font-size: 18px; color: var(--mint); max-width: 560px; margin: 0 0 40px; line-height: 1.55; }
+#start-btn {
+  background: var(--amber); color: var(--forest-dark); border: none;
+  font-size: 20px; font-weight: 800; padding: 18px 52px; border-radius: 999px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.28);
+  transition: transform .15s ease, box-shadow .15s ease;
+  letter-spacing: 0.3px;
+}
+#start-btn:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(0,0,0,0.32); }
+#start-btn:active { transform: translateY(0); }
+.start-audio-note {
+  margin-top: 26px; font-size: 14px; color: var(--mint);
+  display: flex; align-items: center; gap: 8px; opacity: 0.9;
+}
+.start-audio-note svg { flex: none; }
+.start-footer {
+  position: absolute; bottom: 22px; font-size: 12px; color: rgba(255,255,255,0.55);
+  letter-spacing: 0.3px;
+}
+
+/* ---------- Cinematic (intro / conclusion) full-stage overlays ---------- */
+.cine-screen {
+  position: absolute; inset: 0; z-index: 250;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 50% 20%, var(--forest2) 0%, var(--forest-dark) 70%);
+  color: var(--white); text-align: center;
+  opacity: 0; transition: opacity .5s ease;
+}
+.cine-screen.in { opacity: 1; }
+
+/* ============================================================
+   APP SHELL (the simulated Home360 product)
+   ============================================================ */
+#app-shell {
+  position: absolute; inset: 0;
+  display: grid; grid-template-columns: 232px 1fr; grid-template-rows: 64px 1fr;
+  opacity: 0; transition: opacity .5s ease;
+}
+#app-shell.visible { opacity: 1; }
+
+.topbar {
+  grid-column: 1 / 3; grid-row: 1;
+  background: var(--white); border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; z-index: 20;
+}
+.topbar .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; color: var(--forest); font-size: 17px; }
+.topbar .brand .mark {
+  width: 30px; height: 30px; border-radius: 8px; background: var(--forest);
+  color: var(--white); display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 14px; font-family: Georgia, serif;
+}
+.topbar .property-chip { display: flex; align-items: center; gap: 10px; color: var(--gray); font-size: 13.5px; }
+.topbar .property-chip strong { color: var(--ink); font-weight: 700; }
+.topbar .demo-tag {
+  background: var(--warn-bg); color: var(--warn-dark, #8A5006); font-weight: 700;
+  font-size: 11px; padding: 4px 10px; border-radius: 999px; letter-spacing: 0.3px;
+  border: 1px solid #F3D9A6;
+}
+.topbar .right { display: flex; align-items: center; gap: 16px; }
+.health-chip {
+  display: flex; align-items: center; gap: 8px; background: var(--mint2);
+  border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px 6px 8px;
+}
+.health-chip .dot {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: conic-gradient(var(--forest) 0deg 313deg, #E3ECE6 313deg 360deg);
+  display: flex; align-items: center; justify-content: center;
+}
+.health-chip .dot::after { content:""; width: 18px; height: 18px; border-radius: 50%; background: var(--white); }
+.health-chip .val { font-weight: 800; font-size: 13px; color: var(--forest); }
+.avatar {
+  width: 34px; height: 34px; border-radius: 50%; background: var(--forest2); color: var(--white);
+  display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;
+}
+
+.sidebar {
+  grid-column: 1; grid-row: 2;
+  background: var(--forest-dark); color: var(--mint);
+  padding: 18px 12px; display: flex; flex-direction: column; gap: 2px; z-index: 20;
+}
+.sidebar .nav-item {
+  display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.72); transition: all .18s ease;
+}
+.sidebar .nav-item .ic { width: 18px; text-align: center; opacity: 0.85; }
+.sidebar .nav-item.active { background: rgba(255,255,255,0.12); color: var(--white); }
+.sidebar .nav-item.highlight {
+  background: var(--amber); color: var(--forest-dark);
+  box-shadow: 0 0 0 4px rgba(245,158,11,0.28);
+}
+
+.main {
+  grid-column: 2; grid-row: 2;
+  position: relative; overflow: hidden; background: var(--mint2);
+}
+.screen {
+  position: absolute; inset: 0; padding: 28px 34px 100px;
+  overflow-y: auto;
+  opacity: 0; transform: translateY(14px);
+  transition: opacity .45s ease, transform .45s ease;
+  pointer-events: none;
+}
+.screen.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.screen h1 { font-size: 22px; margin: 0 0 4px; color: var(--ink); }
+.screen .screen-sub { color: var(--gray); font-size: 13.5px; margin: 0 0 22px; }
+
+/* ---------- Generic building blocks ---------- */
+.card {
+  background: var(--white); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 18px 20px; box-shadow: var(--shadow-sm);
+}
+.card-title { font-size: 13px; font-weight: 800; color: var(--gray); text-transform: uppercase; letter-spacing: 0.6px; margin: 0 0 12px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+.badge.ok { background: var(--ok-bg); color: var(--ok); }
+.badge.warn { background: var(--warn-bg); color: var(--warn); }
+.badge.danger { background: var(--danger-bg); color: var(--danger); }
+.row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.row:last-child { border-bottom: none; }
+.row .k { color: var(--gray); font-size: 13px; }
+.row .v { font-weight: 700; color: var(--ink); font-size: 13.5px; }
+.pill-btn {
+  background: var(--forest); color: var(--white); border: none; font-weight: 700;
+  font-size: 13px; padding: 10px 18px; border-radius: 999px;
+}
+.pill-btn.ghost { background: var(--white); color: var(--forest); border: 1.5px solid var(--forest); }
+.pill-btn.amber { background: var(--amber); color: var(--forest-dark); }
+
+/* highlight ring used to draw the eye to something the narration references */
+.spot {
+  position: relative;
+}
+.spot.hl { box-shadow: 0 0 0 3px var(--amber), var(--shadow-md); border-radius: var(--radius); transition: box-shadow .3s ease; }
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+.property-header {
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(120deg, var(--forest2), var(--forest));
+  color: var(--white); border-radius: var(--radius); padding: 20px 26px; margin-bottom: 20px;
+}
+.property-header .addr { font-size: 19px; font-weight: 800; }
+.property-header .meta { font-size: 13px; color: var(--mint); margin-top: 4px; }
+.property-header .badge-demo {
+  background: rgba(255,255,255,0.16); border: 1px solid rgba(255,255,255,0.3);
+  padding: 6px 14px; border-radius: 999px; font-size: 11.5px; font-weight: 700; letter-spacing: 0.3px;
+}
+.health-card { display: flex; align-items: center; gap: 20px; }
+.gauge-big { position: relative; width: 96px; height: 96px; flex: none; }
+.gauge-big svg { transform: rotate(-90deg); }
+.gauge-big .num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 800; color: var(--forest); }
+.factor-list { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; }
+.factor-list .f { display: flex; align-items: center; gap: 6px; color: var(--gray); }
+.factor-list .dot2 { width: 7px; height: 7px; border-radius: 50%; }
+.factor-list .dot2.ok { background: var(--ok); }
+.factor-list .dot2.warn { background: var(--warn); }
+
+.list-card .item { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+.list-card .item:last-child { border-bottom: none; }
+.list-card .item .t { font-weight: 600; color: var(--ink); }
+.list-card .item .s { color: var(--gray); font-size: 12px; }
+
+.ask-teaser {
+  display: flex; align-items: center; gap: 12px; background: var(--mint2);
+  border: 1px dashed #BFDBCB; border-radius: var(--radius); padding: 14px 18px; margin-top: 18px;
+  color: var(--forest2); font-size: 13.5px; font-weight: 600;
+}
+
+/* ============================================================
+   CAPTURE / SMART UPLOAD SCENE
+   ============================================================ */
+.capture-wrap { display: grid; grid-template-columns: 1fr 380px; gap: 22px; height: 100%; }
+.chat-panel { display: flex; flex-direction: column; }
+.chat-log { flex: 1; display: flex; flex-direction: column; gap: 12px; padding: 4px 2px 12px; }
+.chat-bubble.user {
+  align-self: flex-end; background: var(--forest); color: var(--white);
+  border-radius: 14px 14px 3px 14px; padding: 11px 15px; font-size: 14px; max-width: 78%;
+}
+.chat-bubble.ai {
+  align-self: flex-start; background: var(--white); border: 1px solid var(--line);
+  border-radius: 14px 14px 14px 3px; padding: 11px 15px; font-size: 14px; max-width: 82%;
+}
+.chat-input-row { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
+.chat-input {
+  flex: 1; border: 1.5px solid var(--line); border-radius: 999px; padding: 12px 18px;
+  font-size: 14px; color: var(--ink); background: var(--white); display: flex; align-items: center;
+}
+.chat-input .caret { display: inline-block; width: 2px; height: 15px; background: var(--forest); margin-left: 2px; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.attach-thumb { display: flex; gap: 8px; margin-top: 4px; }
+.attach-thumb .thumb {
+  width: 62px; height: 62px; border-radius: 10px; background: var(--mint2); border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center; font-size: 22px;
+}
+
+.extract-panel { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; }
+.extract-panel .ph-header { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.extract-panel .ph-icon { width: 34px; height: 34px; border-radius: 9px; background: var(--mint2); display:flex; align-items:center; justify-content:center; font-size: 18px; }
+.scan-anim {
+  position: relative; height: 120px; border-radius: 10px; overflow: hidden; background: var(--mint2);
+  display: flex; align-items: center; justify-content: center; margin: 14px 0; border: 1px solid var(--line);
+}
+.scan-anim .icons { display: flex; gap: 18px; font-size: 30px; opacity: 0.85; }
+.scan-anim .beam {
+  position: absolute; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, var(--amber), transparent);
+  animation: scan 1.6s linear infinite;
+}
+@keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+.extract-row { display:flex; justify-content:space-between; font-size: 12.5px; padding: 7px 0; border-bottom: 1px solid #F0F0F0; opacity: 0; transform: translateX(6px); transition: opacity .35s ease, transform .35s ease; }
+.extract-row.show { opacity: 1; transform: translateX(0); }
+.extract-row .k { color: var(--gray); }
+.extract-row .v { font-weight: 700; color: var(--ink); text-align: right; max-width: 58%; }
+.confirm-check {
+  display: flex; align-items: center; gap: 10px; background: var(--ok-bg); color: var(--ok);
+  border-radius: 10px; padding: 12px 14px; font-weight: 700; font-size: 13px; margin-top: 12px;
+  opacity: 0; transition: opacity .4s ease;
+}
+.confirm-check.show { opacity: 1; }
+
+.propagate-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 12px; margin-top: 20px; }
+.propagate-card {
+  background: var(--white); border: 1px solid var(--line); border-radius: 12px; padding: 14px;
+  text-align: center; opacity: 0.35; transform: scale(0.97); transition: all .4s ease;
+}
+.propagate-card.show { opacity: 1; transform: scale(1); box-shadow: var(--shadow-sm); border-color: var(--forest); }
+.propagate-card .ic { font-size: 20px; margin-bottom: 6px; }
+.propagate-card .lbl { font-size: 11.5px; font-weight: 700; color: var(--forest2); }
+.propagate-card .chk { color: var(--ok); font-size: 12px; margin-top: 4px; opacity: 0; }
+.propagate-card.show .chk { opacity: 1; }
+
+/* ============================================================
+   HEALTH / MAINTENANCE SCENE
+   ============================================================ */
+.task-row {
+  display: flex; align-items: center; justify-content: space-between; padding: 14px 16px;
+  border: 1px solid var(--line); border-radius: 12px; margin-bottom: 10px; background: var(--white);
+}
+.task-row .left { display: flex; align-items: center; gap: 12px; }
+.task-row .ic { width: 36px; height: 36px; border-radius: 9px; display:flex; align-items:center; justify-content:center; font-size: 17px; }
+.task-row.overdue .ic { background: var(--danger-bg); }
+.task-row.normal .ic { background: var(--mint2); }
+.task-row .t { font-weight: 700; font-size: 13.5px; color: var(--ink); }
+.task-row .s { font-size: 12px; color: var(--gray); }
+.task-detail {
+  background: var(--white); border: 1px solid var(--line); border-left: 4px solid var(--amber);
+  border-radius: 10px; padding: 16px 18px; margin-top: 16px; font-size: 13.5px; color: var(--gray);
+  max-height: 0; opacity: 0; overflow: hidden; transition: all .45s ease;
+}
+.task-detail.show { max-height: 240px; opacity: 1; padding: 16px 18px; margin-top: 16px; }
+.task-detail h4 { margin: 0 0 8px; color: var(--ink); font-size: 14px; }
+
+/* ============================================================
+   ACTION / SERVICE REQUEST SCENE
+   ============================================================ */
+.provider-card { display: flex; align-items: center; gap: 14px; }
+.provider-card .avatar2 { width: 44px; height: 44px; border-radius: 10px; background: var(--forest2); color: var(--white); display:flex; align-items:center; justify-content:center; font-weight: 800; }
+.email-draft {
+  background: var(--white); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 20px 22px; margin-top: 18px; box-shadow: var(--shadow-sm);
+}
+.email-draft .field { display: flex; gap: 10px; font-size: 12.5px; color: var(--gray); padding: 6px 0; border-bottom: 1px solid var(--line); }
+.email-draft .field b { color: var(--ink); min-width: 46px; }
+.email-body { font-size: 13.5px; color: var(--ink); line-height: 1.6; padding-top: 12px; min-height: 90px; white-space: pre-wrap; }
+.demo-banner {
+  display: flex; align-items: center; gap: 10px; background: var(--warn-bg); color: var(--warn-dark, #8A5006);
+  border: 1px solid #F3D9A6; border-radius: 10px; padding: 12px 16px; margin-top: 16px;
+  font-weight: 700; font-size: 13px; opacity: 0; transform: translateY(6px); transition: all .4s ease;
+}
+.demo-banner.show { opacity: 1; transform: translateY(0); }
+
+/* ============================================================
+   ASK HOME360 SCENE
+   ============================================================ */
+.ask-wrap { max-width: 780px; margin: 0 auto; }
+.ask-log { display: flex; flex-direction: column; gap: 14px; }
+
+/* ============================================================
+   TIMELINE SCENE
+   ============================================================ */
+.tl-wrap { max-width: 760px; margin: 0 auto; position: relative; padding-left: 26px; }
+.tl-wrap::before { content:""; position: absolute; left: 8px; top: 6px; bottom: 6px; width: 2px; background: var(--line); }
+.tl-event {
+  position: relative; padding-bottom: 22px; opacity: 0; transform: translateX(-8px);
+  transition: opacity .4s ease, transform .4s ease;
+}
+.tl-event.show { opacity: 1; transform: translateX(0); }
+.tl-event::before {
+  content: ""; position: absolute; left: -26px; top: 3px; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--forest); border: 3px solid var(--mint2);
+}
+.tl-event.latest::before { background: var(--amber); box-shadow: 0 0 0 4px rgba(245,158,11,0.25); }
+.tl-event .date { font-size: 11.5px; color: var(--gray); font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+.tl-event .title { font-size: 14.5px; font-weight: 700; color: var(--ink); margin: 3px 0 2px; }
+.tl-event .detail { font-size: 12.5px; color: var(--gray); }
+
+/* ============================================================
+   CAPTIONS + CURSOR + PROGRESS + EXIT
+   ============================================================ */
+#caption-bar {
+  position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%);
+  z-index: 300; max-width: 78%; min-width: 320px;
+  background: rgba(17,24,39,0.86); color: var(--white);
+  padding: 14px 26px; border-radius: 12px; text-align: center;
+  font-size: 19px; line-height: 1.4; font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.28);
+  opacity: 0; transition: opacity .25s ease;
+}
+#caption-bar.show { opacity: 1; }
+#caption-bar .quote-mark { color: var(--amber); }
+
+#sim-cursor {
+  position: absolute; z-index: 400; width: 26px; height: 26px; pointer-events: none;
+  transition: left .65s cubic-bezier(.4,0,.2,1), top .65s cubic-bezier(.4,0,.2,1), opacity .3s ease;
+  opacity: 0; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.35));
+}
+#sim-cursor.show { opacity: 1; }
+#sim-cursor .ring {
+  position: absolute; inset: -14px; border-radius: 50%; border: 2px solid var(--amber); opacity: 0;
+}
+#sim-cursor.click .ring { animation: click-ring .5s ease-out; }
+@keyframes click-ring { 0% { opacity: 0.9; transform: scale(0.4); } 100% { opacity: 0; transform: scale(1.6); } }
+
+#progress-track {
+  position: absolute; top: 0; left: 0; right: 0; height: 4px; background: rgba(255,255,255,0.15); z-index: 350;
+}
+#progress-fill { height: 100%; background: var(--amber); width: 0%; transition: width .3s linear; }
+
+#exit-btn {
+  position: absolute; top: 74px; right: 16px; z-index: 400;
+  background: rgba(17,24,39,0.35); color: rgba(255,255,255,0.85); border: none;
+  font-size: 11.5px; font-weight: 600; padding: 7px 14px; border-radius: 999px;
+  opacity: 0; transition: opacity .3s ease;
+  letter-spacing: 0.3px;
+}
+#exit-btn.show { opacity: 1; }
+#exit-btn:hover { background: rgba(17,24,39,0.55); }
+
+.review-note {
+  position: absolute; bottom: 26px; left: 22px; z-index: 200; max-width: 260px;
+  font-size: 11px; color: rgba(17,24,39,0.55); background: rgba(255,255,255,0.7);
+  padding: 8px 12px; border-radius: 8px; line-height: 1.4;
+}
+
+@media (max-width: 1100px) {
+  #stage { min-width: 0; }
+  #app-shell { grid-template-columns: 76px 1fr; }
+  .sidebar .label { display: none; }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .capture-wrap { grid-template-columns: 1fr; }
+}
+
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+/* ============================================================
+   Home360 Product Demo — Fictional Demo Property
+   ------------------------------------------------------------
+   DEMO PROPERTY — NO REAL CUSTOMER DATA.
+   Every name, address, document, and figure below is invented
+   for demonstration purposes only and does not represent any
+   real Home360 customer, account, or property.
+   ============================================================ */
+
+const DEMO_PROPERTY = {
+  banner: "Demo Property — No Real Customer Data",
+
+  homeowner: {
+    names: "Maria & David Torres",
+    since: "Homeowners since June 2021",
+    avatarInitials: "MT",
+  },
+
+  property: {
+    address: "4212 Willow Creek Lane",
+    cityStateZip: "Asheville, NC 28804",
+    type: "Single-Family Home",
+    yearBuilt: 1998,
+    sqft: "2,450 sq ft",
+    beds: 4,
+    baths: 2.5,
+    purchased: "June 2021",
+  },
+
+  healthScore: {
+    score: 87,
+    label: "Good",
+    factors: [
+      { label: "Maintenance up to date", status: "ok" },
+      { label: "Warranties tracked", status: "ok" },
+      { label: "1 overdue task", status: "warn" },
+    ],
+  },
+
+  rooms: [
+    "Kitchen", "Primary Suite", "Living Room", "Laundry Room",
+    "Garage", "Basement / Utility", "Backyard",
+  ],
+
+  systems: [
+    { name: "HVAC System", detail: "Carrier central heat & air, installed 2019", location: "Basement / Utility" },
+    { name: "Water Heater", detail: "50-gal gas water heater, installed 2020", location: "Basement / Utility" },
+    { name: "Roof", detail: "Asphalt shingle, installed 2015 (~20-yr expected life)", location: "Exterior" },
+    { name: "Electrical Panel", detail: "200-amp panel, updated 2021", location: "Garage" },
+  ],
+
+  appliances: [
+    {
+      id: "fridge", name: "Refrigerator", brand: "Samsung", model: "RF28T5001SR",
+      location: "Kitchen", purchased: "May 2021", price: "$1,899",
+      warranty: "Active — through May 2027", warrantyStatus: "ok",
+    },
+    {
+      id: "dishwasher", name: "Dishwasher", brand: "Bosch", model: "SHPM65Z55N",
+      location: "Kitchen", purchased: "March 2019", price: "$849",
+      warranty: "Expired — March 2021", warrantyStatus: "expired",
+    },
+    {
+      id: "range", name: "Range / Oven", brand: "GE", model: "JGB735SPSS",
+      location: "Kitchen", purchased: "May 2021", price: "$1,199",
+      warranty: "Active — through May 2026", warrantyStatus: "warn",
+    },
+    {
+      id: "dryer", name: "Clothes Dryer", brand: "Whirlpool", model: "WED5000DW",
+      location: "Laundry Room", purchased: "August 2019", price: "$649",
+      warranty: "Expired — August 2020", warrantyStatus: "expired",
+    },
+    // The washing machine below is intentionally absent from the pre-demo
+    // inventory — it's the appliance the live demo adds in Scene 3.
+  ],
+
+  newAppliance: {
+    id: "washer",
+    name: "Washing Machine",
+    brand: "Whirlpool",
+    model: "WFW5620HW",
+    serial: "SN-2847-WT-1195",
+    purchased: "September 7, 2026 (yesterday)",
+    price: "$799.00",
+    retailer: "Home Depot — Asheville, NC",
+    warranty: "1-yr manufacturer + 2-yr extended plan — through March 2029",
+    location: "Laundry Room",
+    recommendedMaintenance: "Clean detergent drawer monthly; inspect hoses every 6 months",
+    expectedLifespan: "10–12 years",
+    replacementCost: "≈ $750–$950 (based on current model pricing)",
+  },
+
+  maintenance: {
+    upcoming: [
+      { task: "Smoke detector battery replacement", due: "Due this month", priority: "normal" },
+      { task: "Dryer vent cleaning", due: "Overdue — last cleaned 14 months ago", priority: "overdue" },
+      { task: "HVAC fall tune-up", due: "Due next month", priority: "normal" },
+    ],
+    history: [
+      { task: "HVAC spring service", date: "March 2026", provider: "CoolBreeze HVAC" },
+      { task: "Gutter cleaning", date: "February 2026", provider: "Blue Ridge Home Services" },
+      { task: "Water heater flush", date: "October 2025", provider: "Blue Ridge Plumbing" },
+    ],
+  },
+
+  documents: [
+    { name: "Home Inspection Report", date: "June 2021", type: "PDF" },
+    { name: "Property Insurance Policy — Declarations", date: "Renewed Jan 2026", type: "PDF" },
+    { name: "HVAC Installation & Warranty", date: "2019", type: "PDF" },
+    { name: "Kitchen Remodel Contract", date: "2023", type: "PDF" },
+  ],
+
+  insuranceInventory: {
+    totalInsurableValue: "$18,400 (tracked appliances & systems)",
+    itemsTracked: 9,
+  },
+
+  improvements: [
+    { name: "Kitchen Remodel", date: "September 2023", detail: "New cabinets, countertops, and range" },
+    { name: "Roof Repair", date: "April 2024", detail: "Storm-damage shingle replacement, section only" },
+    { name: "Water Heater Replacement", date: "October 2020", detail: "Upgraded to 50-gal high-efficiency unit" },
+  ],
+
+  serviceProviders: [
+    { name: "CoolBreeze HVAC", specialty: "Heating & Air", lastUsed: "March 2026", saved: true },
+    { name: "Blue Ridge Plumbing", specialty: "Plumbing", lastUsed: "October 2025", saved: true },
+    { name: "Appliance Care Asheville", specialty: "Appliance Repair & Service", lastUsed: "January 2026", saved: true },
+  ],
+
+  emergencyInfo: [
+    { label: "Main Water Shutoff", location: "Basement, adjacent to water heater" },
+    { label: "Electrical Panel", location: "Garage, rear wall" },
+    { label: "Gas Shutoff", location: "Exterior, side yard near meter" },
+  ],
+
+  timeline: [
+    { date: "June 2021", title: "Home purchased", detail: "4212 Willow Creek Lane, Asheville, NC" },
+    { date: "June 2021", title: "Home inspection completed", detail: "Report added to Documents" },
+    { date: "October 2020", title: "Water heater replaced", detail: "50-gal high-efficiency unit installed" },
+    { date: "September 2023", title: "Kitchen remodel completed", detail: "Cabinets, countertops, range" },
+    { date: "April 2024", title: "Roof repair", detail: "Storm-damage shingle replacement" },
+    { date: "March 2026", title: "HVAC spring service", detail: "CoolBreeze HVAC — system serviced" },
+    // "New washing machine" is appended live during Scene 3 → Scene 7 references it.
+  ],
+
+  askHome360Log: [
+    {
+      q: "Is my washing machine still under warranty?",
+      a: "Yes — it's covered by the manufacturer through March 2027, plus a two-year extended plan.",
+    },
+    {
+      q: "What maintenance is due this month?",
+      a: "Two items: smoke detector batteries, and the dryer vent cleaning we just requested.",
+    },
+    {
+      q: "What would I need for an insurance claim?",
+      a: "Home360 already has the receipts, photos, and appliance values ready to go.",
+    },
+  ],
+};
+
+if (typeof module !== "undefined") module.exports = DEMO_PROPERTY;
+
+</script>
+<script>
+/* ============================================================
+   Home360 Product Demo — Narration / Caption / Beat Script
+   ------------------------------------------------------------
+   Single source of truth for everything spoken and captioned.
+   Each beat = one unit of narration + caption + a visual cue
+   that app.js maps to a concrete on-screen action.
+
+   "audio" filenames correspond 1:1 with files generated by
+   tools/generate_audio.py into audio/. If an audio file is
+   missing or fails to load, the engine falls back to holding
+   the caption on screen for `fallbackMs` before advancing —
+   the demo never stalls or errors out.
+   ============================================================ */
+
+const HOME360_SCRIPT = {
+  scenes: [
+    // ---------------------------------------------------------
+    { id: "intro", name: "Introduction", visual: "intro", beats: [
+      { id: "intro-1", text: "Meet Home360 — your AI Home Manager.", visual: "logo-hero", fallbackMs: 3200 },
+      { id: "intro-2", text: "Understand, organize, maintain, protect, and manage your home — all in one place.", visual: "logo-tagline", fallbackMs: 4200 },
+      { id: "intro-3", text: "Here's a look inside a real Home360 account.", visual: "intro-transition", fallbackMs: 2600 },
+    ]},
+
+    // ---------------------------------------------------------
+    { id: "dashboard", name: "Home Dashboard", visual: "dashboard", beats: [
+      { id: "dash-1", text: "This is the Home360 dashboard for the Torres family home on Willow Creek Lane.", visual: "dash-header", fallbackMs: 4200 },
+      { id: "dash-2", text: "A Home Health Score of 87 sums up how well the home is being cared for.", visual: "dash-health", fallbackMs: 4200 },
+      { id: "dash-3", text: "Upcoming maintenance, active warranties, and anything that needs attention are all right here.", visual: "dash-maintenance", fallbackMs: 4200 },
+      { id: "dash-4", text: "Every document, appliance, and past repair the Torres family owns lives in one organized place.", visual: "dash-documents", fallbackMs: 4400 },
+      { id: "dash-5", text: "Home360 knows what's in this home, what's happened to it, and what needs to happen next.", visual: "dash-overview", fallbackMs: 4400 },
+    ]},
+
+    // ---------------------------------------------------------
+    { id: "capture", name: "Capture a New Appliance", visual: "capture", beats: [
+      { id: "cap-1", text: "Let's see what happens when something new comes into the home.", visual: "cap-open", fallbackMs: 3200 },
+      { id: "cap-2", text: "“I bought a new washing machine yesterday.”", visual: "cap-type", fallbackMs: 3400, isQuote: true },
+      { id: "cap-3", text: "Home360 already has the photo and receipt ready to attach.", visual: "cap-attach", fallbackMs: 3400 },
+      { id: "cap-4", text: "Now Home360's AI reads the photo and the receipt together.", visual: "cap-analyze", fallbackMs: 3800 },
+      { id: "cap-5", text: "In seconds, it pulls out the details that matter.", visual: "cap-extract", fallbackMs: 5200 },
+      { id: "cap-6", text: "One simple upload — Home360 organizes the details and updates the home's records.", visual: "cap-confirm", fallbackMs: 4000 },
+      { id: "cap-7", text: "The appliance inventory, warranty list, insurance records, and home timeline all update automatically.", visual: "cap-propagate", fallbackMs: 4600 },
+    ]},
+
+    // ---------------------------------------------------------
+    { id: "health", name: "Home Health & Maintenance", visual: "health", beats: [
+      { id: "hlt-1", text: "Home360 doesn't just store information — it watches over the home.", visual: "hlt-open", fallbackMs: 3400 },
+      { id: "hlt-2", text: "Here's what's coming up for the Torres home this month.", visual: "hlt-upcoming", fallbackMs: 3400 },
+      { id: "hlt-3", text: "The dryer vent hasn't been cleaned in over a year — a real fire risk worth taking seriously.", visual: "hlt-overdue", fallbackMs: 4600 },
+      { id: "hlt-4", text: "Home360 explains why it matters, and exactly what to do next.", visual: "hlt-detail", fallbackMs: 3600 },
+      { id: "hlt-5", text: "Stored information becomes timely, practical action.", visual: "hlt-close", fallbackMs: 2800 },
+    ]},
+
+    // ---------------------------------------------------------
+    { id: "action", name: "Taking Action", visual: "action", beats: [
+      { id: "act-1", text: "Let's take care of that dryer vent cleaning.", visual: "act-select", fallbackMs: 2800 },
+      { id: "act-2", text: "Home360 already knows a trusted provider the Torres family has used before.", visual: "act-provider", fallbackMs: 3800 },
+      { id: "act-3", text: "It prepares a professional service request, ready for review.", visual: "act-draft", fallbackMs: 3800 },
+      { id: "act-4", text: "Demo mode: this service request has been prepared but will not be sent.", visual: "act-demo-banner", fallbackMs: 3800 },
+      { id: "act-5", text: "From noticing a need to taking action, in just a few seconds.", visual: "act-close", fallbackMs: 3400 },
+    ]},
+
+    // ---------------------------------------------------------
+    { id: "ask", name: "Ask Home360", visual: "ask", beats: [
+      { id: "ask-1", text: "Sometimes the fastest answer is just to ask.", visual: "ask-open", fallbackMs: 2800 },
+      { id: "ask-2", text: "“Is my washing machine still under warranty?”", visual: "ask-q1", fallbackMs: 3200, isQuote: true },
+      { id: "ask-2a", text: "Yes — it's covered by the manufacturer through March 2027, plus a two-year extended plan.", visual: "ask-a1", fallbackMs: 4200 },
+      { id: "ask-3", text: "“What maintenance is due this month?”", visual: "ask-q2", fallbackMs: 3000, isQuote: true },
+      { id: "ask-3a", text: "Two items: smoke detector batteries, and that dryer vent cleaning we just requested.", visual: "ask-a2", fallbackMs: 3800 },
+      { id: "ask-4", text: "“What would I need for an insurance claim?”", visual: "ask-q3", fallbackMs: 3200, isQuote: true },
+      { id: "ask-4a", text: "Home360 already has the receipts, photos, and appliance values ready to go.", visual: "ask-a3", fallbackMs: 3800 },
+      { id: "ask-5", text: "Every answer comes from the organized information already stored about this specific home.", visual: "ask-close", fallbackMs: 4200 },
+    ]},
+
+    // ---------------------------------------------------------
+    { id: "timeline", name: "Home Timeline", visual: "timeline", beats: [
+      { id: "tl-1", text: "Every home has a story. Home360 keeps it organized.", visual: "tl-open", fallbackMs: 3000 },
+      { id: "tl-2", text: "From the day the Torres family bought the home…", visual: "tl-purchase", fallbackMs: 3000 },
+      { id: "tl-3", text: "…through renovations and repairs…", visual: "tl-scroll", fallbackMs: 2600 },
+      { id: "tl-4", text: "…right up to this week's new washing machine.", visual: "tl-latest", fallbackMs: 3000 },
+      { id: "tl-5", text: "That history is ready whenever it's needed — for maintenance, insurance, refinancing, or selling the home.", visual: "tl-uses", fallbackMs: 4600 },
+      { id: "tl-6", text: "It can even be handed off to the home's next owner.", visual: "tl-handoff", fallbackMs: 3200 },
+    ]},
+
+    // ---------------------------------------------------------
+    { id: "conclusion", name: "Conclusion", visual: "conclusion", beats: [
+      { id: "end-1", text: "Your home has thousands of important details.", visual: "end-1", fallbackMs: 3000 },
+      { id: "end-2", text: "Home360 brings them together, and turns them into useful action.", visual: "end-2", fallbackMs: 3600 },
+      { id: "end-3", text: "Home360 — your AI Home Manager.", visual: "end-logo", fallbackMs: 3200 },
+      { id: "end-4", text: "Learn more at myhomethreesixty.com.", visual: "end-website", fallbackMs: 3600 },
+    ]},
+  ],
+};
+
+// Flat lookup of every beat, in order, for the audio build script and the player engine.
+HOME360_SCRIPT.allBeats = HOME360_SCRIPT.scenes.flatMap(s => s.beats.map(b => ({ ...b, sceneId: s.id })));
+
+if (typeof module !== "undefined") module.exports = HOME360_SCRIPT;
+
+</script>
+<script>
+/* ============================================================
+   Home360 Product Demo — Self-Running Engine
+   ------------------------------------------------------------
+   Presenter interaction surface: exactly one button (Start Demo)
+   plus a discreet Exit Demo control. Everything else — narration,
+   captions, simulated cursor, typing, screen transitions, and
+   automatic looping back to the start — is driven from here.
+   ============================================================ */
+
+(function () {
+  "use strict";
+
+  const D = DEMO_PROPERTY;
+  const SCRIPT = HOME360_SCRIPT;
+
+  // ---- DOM refs (populated on init) ----
+  let els = {};
+  let cancelled = false;      // set true by Exit Demo to abort the run
+  let runToken = 0;           // guards against overlapping runs
+
+  // ============================================================
+  // Boot
+  // ============================================================
+  // Some hosting contexts (e.g. content injected into an iframe after
+  // the document has already finished parsing) can fire DOMContentLoaded
+  // before this listener is registered. Guard against that by checking
+  // readyState and initializing immediately if the DOM is already ready.
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+
+  function init() {
+    buildStaticShell();
+    buildScreens();
+    els.startBtn.addEventListener("click", onStartClicked);
+    els.exitBtn.addEventListener("click", onExitClicked);
+    resetDemoState();
+  }
+
+  function onStartClicked() {
+    const myToken = ++runToken;
+    cancelled = false;
+    els.startScreen.classList.add("hidden");
+    els.exitBtn.classList.add("show");
+    setTimeout(() => runShow(myToken), 350);
+  }
+
+  function onExitClicked() {
+    cancelled = true;
+    returnToStart(true);
+  }
+
+  // ============================================================
+  // Static shell: start screen, app chrome, caption bar, cursor
+  // ============================================================
+  function buildStaticShell() {
+    const stage = document.getElementById("stage");
+
+    stage.insertAdjacentHTML("beforeend", `
+      <div id="progress-track"><div id="progress-fill"></div></div>
+
+      <div id="start-screen">
+        <div class="start-logo">
+          <div class="mark">H</div>
+          <div class="word">HOME360</div>
+        </div>
+        <h1 class="start-title">Home360 Product Demonstration</h1>
+        <p class="start-sub">A guided, self-running walkthrough of Home360 — your AI Home Manager.</p>
+        <button id="start-btn">Start Demo</button>
+        <div class="start-audio-note">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h10M4 17h13"/></svg>
+          This demonstration runs on screen with captions — no sound needed.
+        </div>
+        <div class="start-footer">Demo Property — No Real Customer Data · Principium Technology</div>
+      </div>
+
+      <div id="intro-screen" class="cine-screen" style="display:none;"></div>
+      <div id="conclusion-screen" class="cine-screen" style="display:none;"></div>
+
+      <div id="app-shell">
+        <div class="topbar">
+          <div class="brand"><span class="mark">H</span> Home360</div>
+          <div class="property-chip">
+            <strong>${D.property.address}</strong> · ${D.property.cityStateZip}
+            <span class="demo-tag">DEMO PROPERTY — NO REAL CUSTOMER DATA</span>
+          </div>
+          <div class="right">
+            <div class="health-chip"><span class="dot"></span><span class="val">${D.healthScore.score} Health Score</span></div>
+            <div class="avatar">${D.homeowner.avatarInitials}</div>
+          </div>
+        </div>
+        <div class="sidebar" id="sidebar">
+          ${navItem("dashboard", "🏠", "Dashboard")}
+          ${navItem("capture", "📷", "Smart Upload")}
+          ${navItem("health", "🛠️", "Maintenance")}
+          ${navItem("ask", "💬", "Ask Home360")}
+          ${navItem("timeline", "🕒", "Home Timeline")}
+          ${navItem("", "📄", "Documents")}
+          ${navItem("", "🧰", "Service Providers")}
+          ${navItem("", "🛡️", "Insurance")}
+        </div>
+        <div class="main" id="main"></div>
+      </div>
+
+      <div id="sim-cursor"><div class="ring"></div>${cursorSvg()}</div>
+      <div id="caption-bar"></div>
+      <button id="exit-btn">Exit Demo</button>
+    `);
+
+    els.stage = stage;
+    els.startScreen = document.getElementById("start-screen");
+    els.startBtn = document.getElementById("start-btn");
+    els.introScreen = document.getElementById("intro-screen");
+    els.conclusionScreen = document.getElementById("conclusion-screen");
+    els.appShell = document.getElementById("app-shell");
+    els.sidebar = document.getElementById("sidebar");
+    els.main = document.getElementById("main");
+    els.cursor = document.getElementById("sim-cursor");
+    els.caption = document.getElementById("caption-bar");
+    els.exitBtn = document.getElementById("exit-btn");
+    els.progressFill = document.getElementById("progress-fill");
+  }
+
+  function navItem(screenId, icon, label) {
+    return `<div class="nav-item${screenId ? "" : ""}" data-nav="${screenId}"><span class="ic">${icon}</span><span class="label">${label}</span></div>`;
+  }
+
+  function cursorSvg() {
+    return `<svg width="26" height="26" viewBox="0 0 24 24" fill="#F59E0B" stroke="#16221c" stroke-width="1"><path d="M5 3 19 12 12 13.5 9 20Z"/></svg>`;
+  }
+
+  // ============================================================
+  // Screens (dashboard / capture / health / action / ask / timeline)
+  // ============================================================
+  function buildScreens() {
+    els.main.insertAdjacentHTML("beforeend", [
+      screenDashboard(),
+      screenCapture(),
+      screenHealth(),
+      screenAction(),
+      screenAsk(),
+      screenTimeline(),
+    ].join(""));
+
+    els.screens = {
+      dashboard: document.querySelector('[data-screen="dashboard"]'),
+      capture: document.querySelector('[data-screen="capture"]'),
+      health: document.querySelector('[data-screen="health"]'),
+      action: document.querySelector('[data-screen="action"]'),
+      ask: document.querySelector('[data-screen="ask"]'),
+      timeline: document.querySelector('[data-screen="timeline"]'),
+    };
+  }
+
+  function gaugeSvg(score, size) {
+    const r = (size - 14) / 2, c = 2 * Math.PI * r;
+    const off = c * (1 - score / 100);
+    return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+      <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="#E3ECE6" stroke-width="9"/>
+      <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="#2D6A4F" stroke-width="9"
+        stroke-dasharray="${c}" stroke-dashoffset="${off}" stroke-linecap="round"/>
+    </svg>`;
+  }
+
+  function screenDashboard() {
+    const m = D.maintenance;
+    return `<div class="screen" data-screen="dashboard">
+      <div class="property-header">
+        <div>
+          <div class="addr">${D.property.address}</div>
+          <div class="meta">${D.property.cityStateZip} · ${D.property.type} · Built ${D.property.yearBuilt} · ${D.property.sqft} · ${D.homeowner.names}</div>
+        </div>
+        <div class="badge-demo">DEMO PROPERTY</div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom:18px;">
+        <div class="card health-card spot" data-spot="health">
+          <div class="gauge-big">${gaugeSvg(D.healthScore.score, 96)}<div class="num">${D.healthScore.score}</div></div>
+          <div>
+            <div class="card-title" style="margin-bottom:8px;">Home Health Score</div>
+            <div class="factor-list">
+              ${D.healthScore.factors.map(f => `<div class="f"><span class="dot2 ${f.status === "ok" ? "ok" : "warn"}"></span>${f.label}</div>`).join("")}
+            </div>
+          </div>
+        </div>
+        <div class="card list-card spot" data-spot="maintenance">
+          <div class="card-title">Upcoming Maintenance</div>
+          ${m.upcoming.map(t => `<div class="item"><span class="t">${t.task}</span><span class="badge ${t.priority === "overdue" ? "danger" : "warn"}">${t.due}</span></div>`).join("")}
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="card list-card spot" data-spot="warranties">
+          <div class="card-title">Active Warranties</div>
+          ${D.appliances.filter(a => a.warrantyStatus !== "expired").map(a => `<div class="item"><span class="t">${a.name}</span><span class="s">${a.warranty.replace("Active — ", "")}</span></div>`).join("")}
+        </div>
+        <div class="card list-card spot" data-spot="documents">
+          <div class="card-title">Important Documents</div>
+          ${D.documents.slice(0, 4).map(doc => `<div class="item"><span class="t">📄 ${doc.name}</span><span class="s">${doc.date}</span></div>`).join("")}
+        </div>
+        <div class="card list-card spot" data-spot="recent">
+          <div class="card-title">Home Timeline · Recent</div>
+          ${D.timeline.slice(-3).reverse().map(t => `<div class="item"><span class="t">${t.title}</span><span class="s">${t.date}</span></div>`).join("")}
+        </div>
+      </div>
+
+      <div class="ask-teaser spot" data-spot="ask-teaser">💬 Ask Home360 anything about this home — try “What maintenance is due this month?”</div>
+    </div>`;
+  }
+
+  function screenCapture() {
+    return `<div class="screen" data-screen="capture">
+      <h1>Smart Upload</h1>
+      <p class="screen-sub">Tell Home360 about anything new — a purchase, a repair, a document — and it takes care of the rest.</p>
+      <div class="capture-wrap">
+        <div class="chat-panel">
+          <div class="chat-log" id="cap-chat-log"></div>
+          <div class="attach-thumb" id="cap-attach" style="display:none;">
+            <div class="thumb">🧺</div>
+            <div class="thumb">🧾</div>
+          </div>
+          <div class="chat-input-row">
+            <div class="chat-input" id="cap-input"><span id="cap-input-text"></span><span class="caret"></span></div>
+          </div>
+        </div>
+        <div class="extract-panel">
+          <div class="ph-header"><div class="ph-icon">🤖</div><div><div style="font-weight:800;font-size:14px;">Home360 AI</div><div style="font-size:11.5px;color:var(--gray);">Document &amp; photo understanding</div></div></div>
+          <div class="scan-anim" id="cap-scan" style="display:none;">
+            <div class="icons">🧺 🧾</div>
+            <div class="beam"></div>
+          </div>
+          <div id="cap-extract-rows"></div>
+          <div class="confirm-check" id="cap-confirm">✓ Added to your home records</div>
+          <div style="font-size:11px;color:var(--gray-light);margin-top:10px;">AI-extracted details — please review for accuracy.</div>
+        </div>
+      </div>
+      <div class="propagate-grid" id="cap-propagate"></div>
+    </div>`;
+  }
+
+  function screenHealth() {
+    const m = D.maintenance;
+    return `<div class="screen" data-screen="health">
+      <h1>Home Health &amp; Maintenance</h1>
+      <p class="screen-sub">Home Health Score: <strong style="color:var(--forest);">${D.healthScore.score} / 100</strong> — ${D.healthScore.label}</p>
+      <div id="hlt-tasks">
+        ${m.upcoming.map(t => `
+          <div class="task-row ${t.priority === "overdue" ? "overdue" : "normal"}" data-task="${t.task}">
+            <div class="left">
+              <div class="ic">${t.priority === "overdue" ? "⚠️" : "🔧"}</div>
+              <div><div class="t">${t.task}</div><div class="s">${t.due}</div></div>
+            </div>
+            <span class="badge ${t.priority === "overdue" ? "danger" : "warn"}">${t.priority === "overdue" ? "Overdue" : "Upcoming"}</span>
+          </div>`).join("")}
+      </div>
+      <div class="task-detail" id="hlt-detail">
+        <h4>Why this matters</h4>
+        <p style="margin:0 0 8px;">Lint buildup in a dryer vent is one of the leading causes of home electrical fires. It also makes the dryer work harder, raising energy use and wearing out the heating element early.</p>
+        <p style="margin:0;"><strong>Recommended next step:</strong> Schedule a professional vent cleaning — Home360 can prepare the request for you.</p>
+      </div>
+    </div>`;
+  }
+
+  function screenAction() {
+    const provider = D.serviceProviders.find(p => p.specialty.includes("Appliance"));
+    return `<div class="screen" data-screen="action">
+      <h1>Take Action</h1>
+      <p class="screen-sub">Move from a maintenance need straight to a prepared service request.</p>
+      <div class="card provider-card spot" data-spot="provider">
+        <div class="avatar2">${provider.name.split(" ").map(w => w[0]).slice(0,2).join("")}</div>
+        <div>
+          <div style="font-weight:800;font-size:14.5px;">${provider.name}</div>
+          <div style="font-size:12.5px;color:var(--gray);">${provider.specialty} · Last used ${provider.lastUsed} · Saved provider</div>
+        </div>
+      </div>
+      <div class="email-draft" id="action-email">
+        <div class="field"><b>To:</b> ${provider.name} — service@${provider.name.toLowerCase().replace(/[^a-z]/g, "")}.example.com</div>
+        <div class="field"><b>Subject:</b> Service Request — Dryer Vent Cleaning, ${D.property.address}</div>
+        <div class="email-body" id="action-email-body"></div>
+      </div>
+      <div class="demo-banner" id="action-demo-banner">🔒 Demo mode: this service request has been prepared but will not be sent.</div>
+    </div>`;
+  }
+
+  function screenAsk() {
+    return `<div class="screen" data-screen="ask">
+      <h1>Ask Home360</h1>
+      <p class="screen-sub">Natural-language answers, built entirely from this home's own records.</p>
+      <div class="ask-wrap">
+        <div class="ask-log" id="ask-log"></div>
+        <div style="font-size:11px;color:var(--gray-light);margin-top:16px;text-align:center;">Home360 AI answers are generated from stored home data — please review important details before relying on them.</div>
+      </div>
+    </div>`;
+  }
+
+  function screenTimeline() {
+    return `<div class="screen" data-screen="timeline">
+      <h1>Home Timeline</h1>
+      <p class="screen-sub">A continuous, organized history of ${D.property.address}.</p>
+      <div class="tl-wrap" id="tl-wrap"></div>
+    </div>`;
+  }
+
+  // ============================================================
+  // Cursor + typing helpers
+  // ============================================================
+  function moveCursorTo(target, opts) {
+    opts = opts || {};
+    const el = typeof target === "string" ? document.querySelector(target) : target;
+    if (!el) return Promise.resolve();
+    const r = el.getBoundingClientRect();
+    const x = r.left + (opts.xRatio != null ? r.width * opts.xRatio : r.width * 0.5);
+    const y = r.top + (opts.yRatio != null ? r.height * opts.yRatio : r.height * 0.5);
+    els.cursor.classList.add("show");
+    els.cursor.style.left = x + "px";
+    els.cursor.style.top = y + "px";
+    return wait(700).then(() => {
+      if (opts.click) {
+        els.cursor.classList.remove("click");
+        void els.cursor.offsetWidth;
+        els.cursor.classList.add("click");
+      }
+      return wait(opts.click ? 260 : 0);
+    });
+  }
+
+  function hideCursor() { els.cursor.classList.remove("show"); }
+
+  function typeInto(spanEl, text, opts) {
+    opts = opts || {};
+    const speed = opts.speed || 34;
+    spanEl.textContent = "";
+    let i = 0;
+    return new Promise(resolve => {
+      (function step() {
+        if (cancelled) return resolve();
+        if (i <= text.length) {
+          spanEl.textContent = text.slice(0, i);
+          i++;
+          setTimeout(step, speed);
+        } else resolve();
+      })();
+    });
+  }
+
+  function wait(ms) {
+    return new Promise(resolve => {
+      (function tick(remaining) {
+        if (cancelled) return resolve();
+        if (remaining <= 0) return resolve();
+        const chunk = Math.min(remaining, 120);
+        setTimeout(() => tick(remaining - chunk), chunk);
+      })(ms);
+    });
+  }
+
+  function clearSpotlights() {
+    document.querySelectorAll(".spot.hl").forEach(el => el.classList.remove("hl"));
+  }
+  function spotlight(selector) {
+    clearSpotlights();
+    const el = typeof selector === "string" ? document.querySelector(selector) : selector;
+    if (el) el.classList.add("hl");
+  }
+
+  function showScreen(id) {
+    Object.values(els.screens).forEach(s => s.classList.remove("active"));
+    if (els.screens[id]) els.screens[id].classList.add("active");
+    document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active", "highlight"));
+    const navMap = { dashboard: "dashboard", capture: "capture", health: "health", action: "health", ask: "ask", timeline: "timeline" };
+    const navId = navMap[id];
+    if (navId) {
+      const nav = document.querySelector(`[data-nav="${navId}"]`);
+      if (nav) nav.classList.add("active", "highlight");
+    }
+  }
+
+  // ============================================================
+  // Caption timing for one beat
+  // ============================================================
+  function showCaption(text, isQuote) {
+    els.caption.innerHTML = isQuote ? `<span class="quote-mark">“</span>${escapeHtml(text.replace(/[“”]/g, ""))}<span class="quote-mark">”</span>` : escapeHtml(text);
+    els.caption.classList.add("show");
+  }
+  function hideCaption() { els.caption.classList.remove("show"); }
+
+  function escapeHtml(s) {
+    const d = document.createElement("div");
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  // No recorded narration — the demo is caption-driven. Each beat holds its
+  // caption on screen for a duration paced to comfortable silent reading
+  // speed (roughly 155 words/minute, with a floor so short captions don't
+  // flash by and a per-beat minimum from content.js as a sanity backstop).
+  function captionHoldMs(beat) {
+    const words = (beat.text || "").trim().split(/\s+/).filter(Boolean).length;
+    const paced = 850 + words * 520;
+    return Math.max(paced, beat.fallbackMs || 0, 2000);
+  }
+
+  function playBeatAudio(beat) {
+    return wait(captionHoldMs(beat));
+  }
+
+  // ============================================================
+  // Per-beat visual actions
+  // ============================================================
+  const visualActions = {
+    // ---- Intro ----
+    "logo-hero": () => cinematic(els.introScreen, `
+      <div class="start-logo"><div class="mark">H</div><div class="word">HOME360</div></div>
+      <h1 class="start-title">Meet Home360</h1>
+      <p class="start-sub">Your AI Home Manager</p>`),
+    "logo-tagline": () => cinematic(els.introScreen, `
+      <div class="start-logo"><div class="mark">H</div><div class="word">HOME360</div></div>
+      <p class="start-sub" style="font-size:22px;max-width:720px;">Understand, organize, maintain, protect, and manage your home — all in one place.</p>`),
+    "intro-transition": () => {
+      cinematic(els.introScreen, `
+        <div class="start-logo"><div class="mark">H</div><div class="word">HOME360</div></div>
+        <p class="start-sub">Here's a look inside a real Home360 account…</p>`);
+      return wait(1400).then(() => {
+        els.introScreen.style.display = "none";
+        els.appShell.classList.add("visible");
+        showScreen("dashboard");
+      });
+    },
+
+    // ---- Dashboard ----
+    "dash-header": () => spotlight(".property-header"),
+    "dash-health": () => spotlight('[data-spot="health"]'),
+    "dash-maintenance": () => spotlight('[data-spot="maintenance"]'),
+    "dash-documents": () => { spotlight('[data-spot="documents"]'); return moveCursorTo('[data-spot="documents"]'); },
+    "dash-overview": () => { clearSpotlights(); hideCursor(); return moveCursorTo('[data-spot="ask-teaser"]'); },
+
+    // ---- Capture ----
+    "cap-open": () => { clearSpotlights(); showScreen("capture"); els.screens.capture.scrollTop = 0; return moveCursorTo("#cap-input", { click: true }); },
+    "cap-type": () => typeInto(document.getElementById("cap-input-text"), "I bought a new washing machine yesterday.", { speed: 30 })
+      .then(() => wait(300))
+      .then(() => {
+        const log = document.getElementById("cap-chat-log");
+        log.insertAdjacentHTML("beforeend", `<div class="chat-bubble user">${escapeHtml("I bought a new washing machine yesterday.")}</div>`);
+        document.getElementById("cap-input-text").textContent = "";
+      }),
+    "cap-attach": () => {
+      document.getElementById("cap-attach").style.display = "flex";
+      const log = document.getElementById("cap-chat-log");
+      log.insertAdjacentHTML("beforeend", `<div class="chat-bubble ai">Got it — I found the photo and receipt from yesterday. Want me to add this washing machine to your home records?</div>`);
+      log.scrollTop = log.scrollHeight;
+      return moveCursorTo("#cap-attach", { click: true });
+    },
+    "cap-analyze": () => { document.getElementById("cap-scan").style.display = "flex"; return wait(300); },
+    "cap-extract": () => revealExtraction(),
+    "cap-confirm": () => {
+      document.getElementById("cap-scan").style.display = "none";
+      document.getElementById("cap-confirm").classList.add("show");
+      const log = document.getElementById("cap-chat-log");
+      log.insertAdjacentHTML("beforeend", `<div class="chat-bubble ai">Done! Your washing machine is added, with warranty and maintenance tracked automatically.</div>`);
+      log.scrollTop = log.scrollHeight;
+      // Retroactively add it to the running data model so later scenes see it.
+      if (!D.appliances.find(a => a.id === "washer")) {
+        D.appliances.push({ ...D.newAppliance, warrantyStatus: "ok" });
+        D.timeline.push({ date: "September 2026", title: "New washing machine purchased", detail: `${D.newAppliance.brand} ${D.newAppliance.model} — added via Smart Upload` });
+      }
+      return wait(200);
+    },
+    "cap-propagate": () => revealPropagation(),
+
+    // ---- Health / Maintenance ----
+    "hlt-open": () => { clearSpotlights(); hideCursor(); showScreen("health"); },
+    "hlt-upcoming": () => moveCursorTo("#hlt-tasks .task-row.normal", { click: false }),
+    "hlt-overdue": () => {
+      const row = document.querySelector('#hlt-tasks .task-row.overdue');
+      row && row.classList.add("spot", "hl");
+      return moveCursorTo(row, { click: true });
+    },
+    "hlt-detail": () => { document.getElementById("hlt-detail").classList.add("show"); return wait(200); },
+    "hlt-close": () => wait(300),
+
+    // ---- Action ----
+    "act-select": () => { clearSpotlights(); hideCursor(); showScreen("action"); },
+    "act-provider": () => spotlight('[data-spot="provider"]'),
+    "act-draft": () => {
+      clearSpotlights();
+      const body = `Hi — the dryer vent at ${D.property.address} is due for cleaning (last serviced over a year ago). Could we schedule a visit in the next week or two? Please let us know a few times that work.\n\nThank you,\n${D.homeowner.names}`;
+      return typeInto({ set textContent(v) { document.getElementById("action-email-body").textContent = v; } }, body, { speed: 8 });
+    },
+    "act-demo-banner": () => { document.getElementById("action-demo-banner").classList.add("show"); return wait(200); },
+    "act-close": () => wait(300),
+
+    // ---- Ask Home360 ----
+    "ask-open": () => { clearSpotlights(); hideCursor(); showScreen("ask"); },
+    "ask-q1": () => askAppend("q", D.askHome360Log[0].q),
+    "ask-a1": () => askAppend("a", D.askHome360Log[0].a),
+    "ask-q2": () => askAppend("q", D.askHome360Log[1].q),
+    "ask-a2": () => askAppend("a", D.askHome360Log[1].a),
+    "ask-q3": () => askAppend("q", D.askHome360Log[2].q),
+    "ask-a3": () => askAppend("a", D.askHome360Log[2].a),
+    "ask-close": () => wait(300),
+
+    // ---- Timeline ----
+    "tl-open": () => { clearSpotlights(); hideCursor(); showScreen("timeline"); document.getElementById("tl-wrap").innerHTML = ""; return wait(150); },
+    "tl-purchase": () => revealTimelineUpTo(1),
+    "tl-scroll": () => revealTimelineUpTo(D.timeline.length - 1),
+    "tl-latest": () => revealTimelineUpTo(D.timeline.length),
+    "tl-uses": () => wait(200),
+    "tl-handoff": () => wait(200),
+
+    // ---- Conclusion ----
+    "end-1": () => {
+      els.appShell.classList.remove("visible");
+      hideCursor(); clearSpotlights();
+      return cinematic(els.conclusionScreen, `<p class="start-sub" style="font-size:26px;max-width:760px;">Your home has thousands of important details.</p>`);
+    },
+    "end-2": () => cinematic(els.conclusionScreen, `<p class="start-sub" style="font-size:26px;max-width:760px;">Home360 brings them together — and turns them into useful action.</p>`),
+    "end-logo": () => cinematic(els.conclusionScreen, `
+      <div class="start-logo"><div class="mark">H</div><div class="word">HOME360</div></div>
+      <p class="start-sub">Your AI Home Manager</p>`),
+    "end-website": () => cinematic(els.conclusionScreen, `
+      <div class="start-logo"><div class="mark">H</div><div class="word">HOME360</div></div>
+      <p class="start-sub">Learn more at <strong style="color:#fff;">myhomethreesixty.com</strong></p>`),
+  };
+
+  function cinematic(container, innerHtml) {
+    container.style.display = "flex";
+    container.innerHTML = innerHtml;
+    container.classList.remove("in");
+    void container.offsetWidth;
+    container.classList.add("in");
+    return wait(150);
+  }
+
+  function askAppend(kind, text) {
+    const log = document.getElementById("ask-log");
+    if (kind === "q") {
+      log.insertAdjacentHTML("beforeend", `<div class="chat-bubble user" style="align-self:flex-end;">${escapeHtml(text.replace(/[“”]/g, ""))}</div>`);
+    } else {
+      log.insertAdjacentHTML("beforeend", `<div class="chat-bubble ai">${escapeHtml(text)}</div>`);
+    }
+    log.scrollTop = log.scrollHeight;
+    return wait(150);
+  }
+
+  function revealExtraction() {
+    const fields = [
+      ["Appliance type", "Washing Machine"],
+      ["Manufacturer", D.newAppliance.brand],
+      ["Model", D.newAppliance.model],
+      ["Serial number", D.newAppliance.serial],
+      ["Purchase date", D.newAppliance.purchased],
+      ["Purchase price", D.newAppliance.price],
+      ["Warranty period", D.newAppliance.warranty],
+      ["Location in home", D.newAppliance.location],
+      ["Recommended maintenance", D.newAppliance.recommendedMaintenance],
+      ["Expected lifespan", D.newAppliance.expectedLifespan],
+      ["Est. replacement cost", D.newAppliance.replacementCost],
+    ];
+    const wrap = document.getElementById("cap-extract-rows");
+    wrap.innerHTML = "";
+    let p = Promise.resolve();
+    fields.forEach(([k, v]) => {
+      p = p.then(() => {
+        if (cancelled) return;
+        const row = document.createElement("div");
+        row.className = "extract-row";
+        row.innerHTML = `<span class="k">${k}</span><span class="v">${v}</span>`;
+        wrap.appendChild(row);
+        void row.offsetWidth;
+        row.classList.add("show");
+        return wait(200);
+      });
+    });
+    return p;
+  }
+
+  function revealPropagation() {
+    const cards = [
+      ["🧺", "Appliance Inventory"],
+      ["🛡️", "Warranty Records"],
+      ["🔧", "Maintenance Schedule"],
+      ["📋", "Insurance Inventory"],
+      ["🕒", "Home Timeline"],
+    ];
+    const wrap = document.getElementById("cap-propagate");
+    wrap.innerHTML = "";
+    const screenEl = els.screens.capture;
+    screenEl.scrollTo({ top: screenEl.scrollHeight, behavior: "smooth" });
+    let p = wait(450);
+    cards.forEach(([ic, lbl]) => {
+      const card = document.createElement("div");
+      card.className = "propagate-card";
+      card.innerHTML = `<div class="ic">${ic}</div><div class="lbl">${lbl}</div><div class="chk">✓ Updated</div>`;
+      wrap.appendChild(card);
+      p = p.then(() => wait(180)).then(() => { if (!cancelled) card.classList.add("show"); });
+    });
+    return p;
+  }
+
+  function revealTimelineUpTo(count) {
+    const wrap = document.getElementById("tl-wrap");
+    const items = D.timeline;
+    // Rebuild fully each call (cheap; list is short) so late-added events show.
+    wrap.querySelectorAll(".tl-event").forEach(n => {}); // no-op, kept for clarity
+    const have = wrap.querySelectorAll(".tl-event").length;
+    for (let i = have; i < Math.min(count, items.length); i++) {
+      const t = items[i];
+      const el = document.createElement("div");
+      el.className = "tl-event" + (i === items.length - 1 && items.length > 6 ? " latest" : "");
+      el.innerHTML = `<div class="date">${t.date}</div><div class="title">${t.title}</div><div class="detail">${t.detail}</div>`;
+      wrap.appendChild(el);
+      void el.offsetWidth;
+      el.classList.add("show");
+    }
+    wrap.scrollTop = wrap.scrollHeight;
+    return wait(150);
+  }
+
+  // ============================================================
+  // Sequencer
+  // ============================================================
+  function totalBeatCount() { return SCRIPT.allBeats.length; }
+
+  async function runShow(myToken) {
+    let doneCount = 0;
+    const total = totalBeatCount();
+
+    for (const scene of SCRIPT.scenes) {
+      for (const beat of scene.beats) {
+        if (cancelled || myToken !== runToken) return;
+
+        showCaption(beat.text, beat.isQuote);
+        const action = visualActions[beat.visual];
+        const visualPromise = action ? Promise.resolve(action()).catch(() => {}) : Promise.resolve();
+        const captionPromise = playBeatAudio(beat);
+
+        await Promise.all([visualPromise, captionPromise]);
+        if (cancelled || myToken !== runToken) return;
+
+        doneCount++;
+        els.progressFill.style.width = Math.round((doneCount / total) * 100) + "%";
+        await wait(160); // tiny breathing room between beats
+      }
+    }
+
+    if (cancelled || myToken !== runToken) return;
+    hideCaption();
+    await wait(3200);
+    if (cancelled || myToken !== runToken) return;
+    returnToStart(false);
+  }
+
+  function returnToStart(immediate) {
+    hideCaption();
+    hideCursor();
+    clearSpotlights();
+    els.exitBtn.classList.remove("show");
+    els.progressFill.style.width = "0%";
+    els.conclusionScreen.style.display = "none";
+    els.introScreen.style.display = "none";
+    els.appShell.classList.remove("visible");
+
+    const revive = () => {
+      resetDemoState();
+      els.startScreen.classList.remove("hidden");
+    };
+    if (immediate) revive();
+    else setTimeout(revive, 500);
+  }
+
+  // Restores the fictional dataset to its clean starting point so every
+  // presentation looks identical, regardless of how the previous run ended.
+  function resetDemoState() {
+    if (D.appliances.find(a => a.id === "washer")) {
+      D.appliances = D.appliances.filter(a => a.id !== "washer");
+    }
+    D.timeline = D.timeline.filter(t => !t.title.includes("New washing machine"));
+    showScreen("dashboard");
+    document.getElementById("cap-chat-log") && (document.getElementById("cap-chat-log").innerHTML = "");
+    document.getElementById("cap-attach") && (document.getElementById("cap-attach").style.display = "none");
+    document.getElementById("cap-scan") && (document.getElementById("cap-scan").style.display = "none");
+    document.getElementById("cap-extract-rows") && (document.getElementById("cap-extract-rows").innerHTML = "");
+    document.getElementById("cap-confirm") && document.getElementById("cap-confirm").classList.remove("show");
+    document.getElementById("cap-propagate") && (document.getElementById("cap-propagate").innerHTML = "");
+    document.getElementById("hlt-detail") && document.getElementById("hlt-detail").classList.remove("show");
+    document.getElementById("action-demo-banner") && document.getElementById("action-demo-banner").classList.remove("show");
+    document.getElementById("action-email-body") && (document.getElementById("action-email-body").textContent = "");
+    document.getElementById("ask-log") && (document.getElementById("ask-log").innerHTML = "");
+    document.getElementById("tl-wrap") && (document.getElementById("tl-wrap").innerHTML = "");
+  }
+})();
+
+</script>
+</body>
+</html>
